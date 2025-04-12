@@ -1,6 +1,8 @@
 ﻿using System.Text;
 using System.Text.Json;
 using System.Diagnostics;
+using System.Text.RegularExpressions;
+using System.Security.Cryptography;
 namespace CloudSubscription.Panels
 {
     public class CreateNewSubscription
@@ -23,20 +25,20 @@ namespace CloudSubscription.Panels
         /// </summary>
         public int StorageSpaceGb { get; set; } = 16;
 
-        private int StorageSpaceGb_Min = 16;
+        internal int StorageSpaceGb_Min = 16;
 
-        private int StorageSpaceGb_Max = 4096;
+        internal int StorageSpaceGb_Max = 4096;
 
-        private int StorageSpaceGb_Step = 16;
+        internal int StorageSpaceGb_Step = 16;
 
         /// <summary>
         /// Subscription duration in days
         /// </summary>
         public int DurationOfSubscriptionInDays { get; set; } = 30;
 
-        private int DurationOfSubscriptionInDays_Min = 30;
+        internal int DurationOfSubscriptionInDays_Min = 30;
 
-        private int DurationOfSubscriptionInDays_Max = 365;
+        internal int DurationOfSubscriptionInDays_Max = 365;
 
         private int Coefficient => StorageSpaceGb * DurationOfSubscriptionInDays;
 
@@ -59,7 +61,7 @@ namespace CloudSubscription.Panels
         /// <summary>
         /// Automatic discount that increases as the subscription features increase
         /// </summary>
-        public string DiscountApplied => (int)((1 - CoefficientDiscount) * 100) + "% (discount of €" + Math.Round(FullCostInEuro - CostInEuro, 2) + ")"  ;
+        public string DiscountApplied => (int)((1 - CoefficientDiscount) * 100) + "% (discount of €" + Math.Round(FullCostInEuro - CostInEuro, 2) + ")";
 
 
         /// <summary>
@@ -75,7 +77,7 @@ namespace CloudSubscription.Panels
         /// <summary>
         /// Subscriber's email address
         /// </summary>
-        public string? Email { get; set; } 
+        public string? Email { get; set; }
 
         /// <summary>
         /// Confirm your subscription to the cloud service, as per your settings
@@ -84,11 +86,39 @@ namespace CloudSubscription.Panels
         [DebuggerHidden]
         public string Submit()
         {
+            if (Email == null || !Regex.IsMatch(Email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$")) // validate Email address
+            {
+                throw new ArgumentException("Invalid email address!");
+            }
             string jsonString = JsonSerializer.Serialize(this);
+            byte[] id = [.. SHA256.HashData(Encoding.UTF8.GetBytes(jsonString)).Take(8)];
+            var idHex = BitConverter.ToString(id).Replace("-", "");
+            File.WriteAllText(Path.Combine(DataPath.FullName, idHex), jsonString);
+                 
+            // Add payment processing logic here
+
+          
+            
+            
+            
+            
+            // Move this code part after payment successful            
+            // Set the cloud subscription to cloud server
             using var client = new HttpClient();
             var content = new StringContent(jsonString, Encoding.UTF8, "application/json");
             var response = client.PostAsync(Settings.ApiEndpoint, content); // Send POST request
             return response.Result.ToString();
         }
+
+        private DirectoryInfo DataPath
+        {
+            get
+            {
+                var dataPath = new DirectoryInfo(Path.Combine(AppContext.BaseDirectory, "AppData"));
+                dataPath.Create(); // Create the directory if it doesn't exist
+                return dataPath;
+            }
+        }
+
     }
 }
