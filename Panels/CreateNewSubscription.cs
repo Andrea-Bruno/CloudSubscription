@@ -15,10 +15,14 @@ namespace CloudSubscription.Panels
         public string Method => nameof(CreateNewSubscription);
 
         /// <summary>
-        /// Standard cost in Euro (daily cost for Gigabyte)
+        /// Cost base in Euro (Daily cost per GB before discount)
         /// </summary>
-        public double DailyCostForGb { get; set; } = 0.005;
+        public double BaseDailyCostForGb { get; } = 0.005;
 
+        /// <summary>
+        /// Effective daily cost per GB with volume discount
+        /// </summary>
+        public double EffectiveDailyCostForGb => Math.Round(CostInEuro / (StorageSpaceGb * DurationOfSubscriptionInDays), 4);
 
         /// <summary>
         /// Gigabytes of space required
@@ -40,7 +44,7 @@ namespace CloudSubscription.Panels
 
         internal int DurationOfSubscriptionInDays_Max = 365;
 
-        private int Coefficient => StorageSpaceGb * DurationOfSubscriptionInDays;
+        private double Coefficient => StorageSpaceGb * DurationOfSubscriptionInDays;
 
         /// <summary>
         /// Coefficient discount
@@ -48,20 +52,15 @@ namespace CloudSubscription.Panels
         private double CoefficientDiscount => DiscountCoeficent(Coefficient);
 
         /// <summary>
-        /// Coefficient discount
-        /// </summary>
-        private string CoefficientDiscountString => Math.Round(CoefficientDiscount, 2).ToString();
-
-        /// <summary>
         /// Full cost not discounted
         /// </summary>
-        public int FullCostInEuro => (int)(DailyCostForGb * Coefficient);
+        public double FullCostInEuro => Math.Round(BaseDailyCostForGb * Coefficient, 2);
 
 
         /// <summary>
         /// Automatic discount that increases as the subscription features increase
         /// </summary>
-        public string DiscountApplied => (int)((1 - CoefficientDiscount) * 100) + "% (discount of €" + Math.Round(FullCostInEuro - CostInEuro, 2) + ")";
+        public string DiscountApplied => "Discount of €" + Math.Round(FullCostInEuro - CostInEuro, 2) + " (~" + Math.Round((1 - CoefficientDiscount) * 100, 0) + "%)";
 
 
         /// <summary>
@@ -94,14 +93,14 @@ namespace CloudSubscription.Panels
             byte[] id = [.. SHA256.HashData(Encoding.UTF8.GetBytes(jsonString)).Take(8)];
             var idHex = BitConverter.ToString(id).Replace("-", "");
             File.WriteAllText(Path.Combine(DataPath.FullName, idHex), jsonString);
-                 
+
             // Add payment processing logic here
 
-          
-            
-            
-            
-            
+
+
+
+
+
             // Move this code part after payment successful            
             // Set the cloud subscription to cloud server
             using var client = new HttpClient();
