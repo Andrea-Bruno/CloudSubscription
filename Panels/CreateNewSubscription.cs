@@ -79,6 +79,11 @@ namespace CloudSubscription.Panels
         public string? Email { get; set; }
 
         /// <summary>
+        /// Redirect the user to specific web address;
+        /// </summary>
+        internal Uri? Redirect = null;
+
+        /// <summary>
         /// Confirm your subscription to the cloud service, as per your settings
         /// </summary>
         /// <returns></returns>
@@ -90,26 +95,31 @@ namespace CloudSubscription.Panels
                 throw new ArgumentException("Invalid email address!");
             }
             string jsonString = JsonSerializer.Serialize(this);
-            byte[] id = [.. SHA256.HashData(Encoding.UTF8.GetBytes(jsonString)).Take(8)];
-            var idHex = BitConverter.ToString(id).Replace("-", "");
-            File.WriteAllText(Path.Combine(DataPath.FullName, idHex), jsonString);
-
-            // Add payment processing logic here
-
-
-
-
-
-
-            // Move this code part after payment successful            
-            // Set the cloud subscription to cloud server
-            using var client = new HttpClient();
-            var content = new StringContent(jsonString, Encoding.UTF8, "application/json");
-            var response = client.PostAsync(Settings.ApiEndpoint, content); // Send POST request
-            return response.Result.ToString();
+            var id = BitConverter.ToUInt64([.. SHA256.HashData(Encoding.UTF8.GetBytes(jsonString)).Take(8)]);
+            var idHex = id.ToString("X");
+            File.WriteAllText(Path.Combine(DataPath.FullName, idHex + ".subscription"), jsonString);
+            var paypalLink = PayPal.Util.GeneratePayPalLink(Settings.PayPalBusinessEmail, "Cloud Storage, Day=" + DurationOfSubscriptionInDays + ", GB=" + StorageSpaceGb, CostInEuro, "EUR", idHex);
+            Redirect = new Uri(paypalLink);
+            return "Redirection to the payment platform";
         }
 
-        private DirectoryInfo DataPath
+        internal static CreateNewSubscription Load(string idHex, out string jsonString)
+        {
+            var filePath = Path.Combine(DataPath.FullName, idHex + ".subscription");
+            if (!File.Exists(filePath))
+            {
+                throw new FileNotFoundException($"The file with ID '{idHex}' does not exist.");
+            }
+            jsonString = File.ReadAllText(filePath);
+            var subscription = JsonSerializer.Deserialize<CreateNewSubscription>(jsonString);
+            if (subscription == null)
+            {
+                throw new InvalidOperationException("Failed to load subscription. The data might be corrupted.");
+            }
+            return subscription;
+        }
+
+        static private DirectoryInfo DataPath
         {
             get
             {

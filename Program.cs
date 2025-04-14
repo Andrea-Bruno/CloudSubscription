@@ -1,9 +1,12 @@
 using CloudSubscription.Components;
+using CloudSubscription.PayPal;
 using static CloudSubscription.Settings;
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 
+
 // load settings from appsettings.json
+PayPalBusinessEmail = configuration.GetValue(typeof(string), nameof(PayPalBusinessEmail), null) as string;
 ApiEndpoint = configuration.GetValue(typeof(string), nameof(ApiEndpoint) , null) as string;
 
 // Add services to the container.
@@ -14,6 +17,9 @@ builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 
+// user for PayPal IPN validation
+app.UseMiddleware<PayPalIpnMiddleware>();
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
@@ -23,10 +29,7 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-
 app.UseAntiforgery();
-
 app.MapStaticAssets();
 app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 
