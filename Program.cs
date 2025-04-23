@@ -1,5 +1,5 @@
+using CloudSubscription;
 using CloudSubscription.Components;
-using CloudSubscription.PayPal;
 using static CloudSubscription.Settings;
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -17,8 +17,13 @@ builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 
+//if (!Debugger.IsAttached)
+//{
+//    app.Urls.Add("http://*:5444");
+//    app.Urls.Add("https://*:80");
+//}
 // user for PayPal IPN validation
-app.UseMiddleware<PayPalIpnMiddleware>();
+app.UseMiddleware<PayPal.PayPalIpnMiddleware>(Events.OnPaymentCompleted);
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

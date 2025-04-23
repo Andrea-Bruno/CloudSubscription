@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\PayPal\PayPal.csproj" />
     <ProjectReference Include="..\..\..\UISupportBlazor\UISupportBlazor.csproj" />
   </ItemGroup>
 
