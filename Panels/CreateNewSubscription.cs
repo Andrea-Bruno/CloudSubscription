@@ -126,7 +126,7 @@ namespace CloudSubscription.Panels
             var returnUrl = baseUrl + "/nav/" + typeof(LoginCredential).GUID + "?" + nameof(IdHex) + "=" + IdHex;
             var cancelUrl = baseUrl + "/cancel/";
             var info = "Cloud Storage, Day=" + DurationOfSubscriptionInDays + ", GB=" + StorageSpaceGb + ", " + nameof(IdHex) + "=" + IdHex;
-            var paypalLink = PayPal.Util.GeneratePayPalLink(Settings.PayPalBusinessEmail, info, CostInEuro, "EUR", IdHex, true, returnUrl, cancelUrl, DurationOfSubscriptionInDays);
+            var paypalLink = PayPal.Util.GeneratePayPalLink(Settings.PayPalBusinessEmail, info, CostInEuro, "EUR", IdHex, returnUrl, cancelUrl, true, DurationOfSubscriptionInDays);
             Redirect = new Uri(paypalLink);
             return "Redirection to the payment platform";
         }

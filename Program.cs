@@ -14,14 +14,8 @@ builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 
 // Used to get httpContext in razor pages
 builder.Services.AddHttpContextAccessor();
-
 var app = builder.Build();
 
-//if (!Debugger.IsAttached)
-//{
-//    app.Urls.Add("http://*:5444");
-//    app.Urls.Add("https://*:80");
-//}
 // user for PayPal IPN validation
 app.UseMiddleware<PayPal.PayPalIpnMiddleware>(Events.OnPaymentCompleted);
 
