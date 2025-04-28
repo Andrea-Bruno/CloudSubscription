@@ -26,7 +26,7 @@
             UISupportBlazor.Session.Configure(HttpContextAccessor);
         var panels = UISupportBlazor.Support.GetAllClassInfo();
         var session = UISupportBlazor.Session.Current();
-        if (!session.Values.ContainsKey("BaseUrl"))
+        if (session?.Values.ContainsKey("BaseUrl") == false)
         {
             var uri = new Uri(Navigation.Uri);
             var baseUrl = $"{uri.Scheme}://{uri.Host}:{uri.Port}";
