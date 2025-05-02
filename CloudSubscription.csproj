@@ -5,15 +5,31 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/Andrea-Bruno/CloudSubscription</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Markdig" Version="0.41.1" />
+    <PackageReference Include="PayPal.Easy" Version="1.25.5.2" />
+    <PackageReference Include="SystemExtra" Version="1.25.5.2" />
     <PackageReference Include="UISupportBlazor" Version="1.25.4.8" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\PayPal\PayPal.csproj" />
+    <ProjectReference Include="..\..\..\SystemExtra\SystemExtra.csproj" />
     <ProjectReference Include="..\..\..\UISupportBlazor\UISupportBlazor.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="install.sh">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>

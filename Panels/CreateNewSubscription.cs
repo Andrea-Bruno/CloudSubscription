@@ -111,13 +111,17 @@ namespace CloudSubscription.Panels
         /// Once the payment is completed, press the "return to the seller's site" button, you will then see your encrypted QR (you will have to keep it, it is part of the cloud access credentials). The 2FA will instead be sent separately via email.
         /// </summary>
         /// <returns></returns>
-        [DebuggerHidden]
+        // [DebuggerHidden]
         public string Submit()
         {
             if (Email == null || !Regex.IsMatch(Email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$")) // validate Email address
             {
                 throw new ArgumentException("Invalid email address!");
             }
+            using var httpClient = new HttpClient();
+            var response = httpClient.PostAsync(Settings.ApiEndpoint, null).Result;
+            if (response.StatusCode != System.Net.HttpStatusCode.BadRequest) // is on-line but the POST is empty 
+                throw new Exception($"Cannot reach endpoint {Settings.ApiEndpoint}");
             Save(Step.Pending);
             var session = UISupportBlazor.Session.Current();
             var LoginCredential = session.GetPanel(typeof(LoginCredential)) as LoginCredential;

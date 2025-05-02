@@ -1,7 +1,37 @@
-﻿@page "/"
+﻿@using System.IO
+@using Markdig
+@page "/"
+<style>
+    .markdown-content h1 {
+        font-size: 2rem;
+        color: #333;
+    }
 
-<PageTitle>Home</PageTitle>
+    .markdown-content p {
+        line-height: 1.6;
+    }
 
-<h1>Hello, world!</h1>
+    .markdown-content ul {
+        padding-left: 1.5rem;
+    }
+</style>
 
-Welcome to your new app.
+<PageTitle>Cloud storage service subscription</PageTitle>
+
+<div class="markdown-content">
+    @((MarkupString)RenderedMarkdown)
+</div>
+
+<a class="btn btn-primary" href="@LinkRegisterNow">Register Now</a>
+
+@code {
+    private string RenderedMarkdown;
+
+    private string LinkRegisterNow = "/nav/" + typeof(Panels.CreateNewSubscription).GUID.ToString();
+
+    protected override void OnInitialized()
+    {
+        var markdown = File.ReadAllText("HOME.md");
+        RenderedMarkdown = Markdown.ToHtml(markdown);
+    }
+}

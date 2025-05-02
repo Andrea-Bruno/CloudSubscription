@@ -4,6 +4,10 @@ using static CloudSubscription.Settings;
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 
+#if RELEASE
+builder.WebHost.UseUrls("http://*:80", "https://*:443");
+SystemExtra.Util.SystemService = true;
+#endif
 
 // load settings from appsettings.json
 PayPalBusinessEmail = configuration.GetValue(typeof(string), nameof(PayPalBusinessEmail), null) as string;
