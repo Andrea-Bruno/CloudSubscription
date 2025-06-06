@@ -142,7 +142,7 @@ namespace CloudSubscription.Panels
             if (string.IsNullOrEmpty(IdHex))
             {
                 var id = BitConverter.ToUInt64([.. Guid.NewGuid().ToByteArray().Take(8)]);
-                IdHex = id.ToString("X");
+                IdHex = id.ToString("X16");
             }
             if (step == Step.Subscription)
             {
